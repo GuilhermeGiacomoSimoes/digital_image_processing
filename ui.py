@@ -11,6 +11,10 @@ from tkinter import filedialog
 root = tk.Tk()
 root.withdraw()
 
+import imageio
+
+import FILTROS as f
+
 class MyWidget(QtWidgets.QWidget):
     def __init__(self):
         super().__init__()
@@ -24,11 +28,24 @@ class MyWidget(QtWidgets.QWidget):
         self.layout.addWidget(button)
         self.setLayout(self.layout)
 
+        self.progress_dialog(self)
+
         button.clicked.connect(self.magic)
 
     def magic(self):
         file_path = filedialog.askopenfilename()
         self.text.setText(file_path)
+
+        lenna = imageio.imread(file_path)
+        f.rodar_em_cor(lenna)
+        f.rodar_em_cinza(lenna)
+
+    def progress_dialog(self):
+        d = QProgressDialog(None, dialog_flags)
+        d.setWindowTitle('索引中...')
+        d.setFont(font())
+        d.show()
+        self.create(d) 
 
 if __name__ == "__main__":
     app = QtWidgets.QApplication([])
