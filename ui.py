@@ -15,7 +15,7 @@ import imageio
 
 import FILTROS as f
 
-class MyWidget(QtWidgets.QWidget):
+class MyWidget():
     def __init__(self):
         super().__init__()
 
@@ -40,12 +40,6 @@ class MyWidget(QtWidgets.QWidget):
         f.rodar_em_cor(lenna)
         f.rodar_em_cinza(lenna)
 
-    def progress_dialog(self):
-        d = QProgressDialog(None, dialog_flags)
-        d.setWindowTitle('索引中...')
-        d.setFont(font())
-        d.show()
-        self.create(d) 
 
 if __name__ == "__main__":
     app = QtWidgets.QApplication([])
