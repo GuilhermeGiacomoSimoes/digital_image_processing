@@ -36,7 +36,6 @@ def binarizar(imagem, k):
                 nova_imagem[i, j] = 0
     return nova_imagem
 
-
 def dividir_imagem_em_canais_de_cor(imagem):
     canais = np.dsplit(imagem, imagem.shape[-1])
     for canal in canais:
@@ -59,10 +58,11 @@ def correlacao(imagem, mascara):
         for j in range(1, altura - 1):
             
             vizinhos = np.array(
-                 [[imagem[i-1, j-1], imagem[i, j-1], imagem[i+1, j-1]],
-                 [imagem[i-1, j], imagem[i, j], imagem[i+1, j]],
-                 [imagem[i-1, j+1], imagem[i, j+1], imagem[i+1, j+1]]]
+                 [[imagem[i-1, j-1], imagem[i, j-1], imagem[i+1, j- 1]],
+                 [imagem[i-1,    j], imagem[i,   j], imagem[i+1,    j]],
+                 [imagem[i-1,  j+1], imagem[i, j+1], imagem[i+1, j+1]]]
             )
+
             if callable(mascara):
                 pixel_com_mascara_aplicada = mascara(vizinhos)
             else:
@@ -74,8 +74,8 @@ def correlacao(imagem, mascara):
     return nova_imagem
 
 def filtro_sobel(imagem):
-    mascara_x = np.array([[-1, 0, 1], [-2, 0, 2], [-1, 0, 1]])
-    mascara_y = np.array([[-1, -2, -1], [0, 0, 0], [1, 2, 1]])
+    mascara_x = np.array([[-1, 0,   1], [-2, 0, 2], [-1, 0, 1]])
+    mascara_y = np.array([[-1, -2, -1], [0, 0,  0], [1, 2,  1]])
 
     nova_imagem_x = convolucao(imagem, mascara_x)
     nova_imagem_y = convolucao(imagem, mascara_y)
@@ -83,8 +83,8 @@ def filtro_sobel(imagem):
 
 
 def filtro_prewitt(imagem):
-    mascara_x = np.array([[-1, 0, 1], [-1, 0, 1], [-1, 0, 1]])
-    mascara_y = np.array([[-1, -1, -1], [0, 0, 0], [1, 1, 1]])
+    mascara_x = np.array([[-1, 0,   1], [-1, 0, 1], [-1, 0, 1]])
+    mascara_y = np.array([[-1, -1, -1], [0, 0,  0], [1, 1,  1]])
 
     nova_imagem_x = convolucao(imagem, mascara_x)
     nova_imagem_y = convolucao(imagem, mascara_y)
@@ -92,24 +92,25 @@ def filtro_prewitt(imagem):
 
 def filtro_mediana(vizinhos):
     vizinhos_ordenados = sorted(vizinhos.flatten())
-    indice_meio = len(vizinhos_ordenados) // 2
+    indice_meio        = len   (vizinhos_ordenados) // 2
     return vizinhos_ordenados[indice_meio]
 
 def filtro_media(vizinhos):
-    vizinhos_somados = np.sum(vizinhos)
+    vizinhos_somados      = np.sum(vizinhos)
     return vizinhos_somados // len(vizinhos)
 
 def filtro_moda(vizinhos):
-    histograma = computar_histograma(vizinhos)
-    moda = np.argmax(histograma)
+    histograma   = computar_histograma(  vizinhos)
+    moda         = np.argmax          (histograma)
     assert moda >= 0 and moda <= 255
     return moda
 
 def quantizar(imagem, k):
     assert len(imagem.shape) == 2
-    tons_por_k = 256 // k
+    tons_por_k      = 256 // k
     largura, altura = imagem.shape
-    nova_imagem = imagem.copy()
+    nova_imagem     = imagem.copy()
+    
     for i in range(largura):
         for j in range(altura):
             resto = nova_imagem[i, j] % tons_por_k
@@ -142,52 +143,53 @@ def aplicar_funcao_em_canais(funcao, imagem, *args):
     def aplicar():
         for canal in dividir_imagem_em_canais_de_cor(imagem):
             yield funcao(canal, *args)
+
     return mesclar_canais_de_cor_em_imagem(list(aplicar()))
 
 
 def run(imagem):
-    binarizado = aplicar_funcao_em_canais(binarizar, imagem, 127)
+    binarizado = aplicar_funcao_em_canais(binarizar, imagem, 127)                                                           #1
     imageio.imwrite('/home/faculdade/git/digital_image_processing/exemplares/binarizado_cor.png',       binarizado      )
     
     identidade = aplicar_funcao_em_canais(convolucao, imagem, mascara_identidade)
-    imageio.imwrite('/home/faculdade/git/digital_image_processing/exemplares/identidade_cor.png',       identidade      )
+    imageio.imwrite('/home/faculdade/git/digital_image_processing/exemplares/identidade_cor.png',       identidade      )   #2
     
     borda = aplicar_funcao_em_canais(convolucao, imagem, mascara_borda)
-    imageio.imwrite('/home/faculdade/git/digital_image_processing/exemplares/borda_cor.png',            borda           )
+    imageio.imwrite('/home/faculdade/git/digital_image_processing/exemplares/borda_cor.png',            borda           )   #3
     
     afiado = aplicar_funcao_em_canais(convolucao, imagem, mascara_afiado)
-    imageio.imwrite('/home/faculdade/git/digital_image_processing/exemplares/afiado_cor.png',           afiado          )
+    imageio.imwrite('/home/faculdade/git/digital_image_processing/exemplares/afiado_cor.png',           afiado          )   #4
     
     borrao = aplicar_funcao_em_canais(convolucao, imagem, mascara_borrao)
-    imageio.imwrite('/home/faculdade/git/digital_image_processing/exemplares/borrao_cor.png',           borrao          )
+    imageio.imwrite('/home/faculdade/git/digital_image_processing/exemplares/borrao_cor.png',           borrao          )   #5
     
     borrao_gaussiano = aplicar_funcao_em_canais(convolucao, imagem, mascara_borrao_gaussiano)
-    imageio.imwrite('/home/faculdade/git/digital_image_processing/exemplares/borrao_gaussiano_cor.png', borrao_gaussiano)
+    imageio.imwrite('/home/faculdade/git/digital_image_processing/exemplares/borrao_gaussiano_cor.png', borrao_gaussiano)   #6
     
     moda = aplicar_funcao_em_canais(correlacao, imagem, filtro_moda)
-    imageio.imwrite('/home/faculdade/git/digital_image_processing/exemplares/moda_cor.png',             moda            )
+    imageio.imwrite('/home/faculdade/git/digital_image_processing/exemplares/moda_cor.png',             moda            )   #7
     
     media = aplicar_funcao_em_canais(correlacao, imagem, filtro_media)
-    imageio.imwrite('/home/faculdade/git/digital_image_processing/exemplares/media_cor.png',            media           )
+    imageio.imwrite('/home/faculdade/git/digital_image_processing/exemplares/media_cor.png',            media           )   #8
     
     mediana = aplicar_funcao_em_canais(correlacao, imagem, filtro_mediana)
-    imageio.imwrite('/home/faculdade/git/digital_image_processing/exemplares/mediana_cor.png',          mediana         )
+    imageio.imwrite('/home/faculdade/git/digital_image_processing/exemplares/mediana_cor.png',          mediana         )   #9
     
     sobel = aplicar_funcao_em_canais(filtro_sobel, imagem)
-    imageio.imwrite('/home/faculdade/git/digital_image_processing/exemplares/sobel_cor.png',            sobel           )
+    imageio.imwrite('/home/faculdade/git/digital_image_processing/exemplares/sobel_cor.png',            sobel           )   #10
     
     prewitt = aplicar_funcao_em_canais(filtro_prewitt, imagem)
-    imageio.imwrite('/home/faculdade/git/digital_image_processing/exemplares/prewitt_cor.png',          prewitt         )
+    imageio.imwrite('/home/faculdade/git/digital_image_processing/exemplares/prewitt_cor.png',          prewitt         )   #11
        
     quantizado_32 = aplicar_funcao_em_canais(quantizar, imagem, 32)
-    imageio.imwrite('/home/faculdade/git/digital_image_processing/exemplares/quantizado_32_cor.png',    quantizado_32   )
+    imageio.imwrite('/home/faculdade/git/digital_image_processing/exemplares/quantizado_32_cor.png',    quantizado_32   )   #12
     
     quantizado_8 = aplicar_funcao_em_canais(quantizar, imagem, 8)
-    imageio.imwrite('/home/faculdade/git/digital_image_processing/exemplares/quantizado_8_cor.png',     quantizado_8    )
+    imageio.imwrite('/home/faculdade/git/digital_image_processing/exemplares/quantizado_8_cor.png',     quantizado_8    )   #...
     
     equalizado = aplicar_funcao_em_canais(equalizar, imagem)
-    imageio.imwrite('/home/faculdade/git/digital_image_processing/exemplares/equalizado_cor.png',       equalizado      )
-
+    imageio.imwrite('/home/faculdade/git/digital_image_processing/exemplares/equalizado_cor.png',       equalizado      )   #13
 
 lenna = imageio.imread ('lenna.jpg')
-run                    (lenna)
+run                    (      lenna)
+
