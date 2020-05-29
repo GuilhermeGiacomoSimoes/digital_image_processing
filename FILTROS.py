@@ -99,12 +99,6 @@ def filtro_media(vizinhos):
     vizinhos_somados      = np.sum(vizinhos)
     return vizinhos_somados // len(vizinhos)
 
-def filtro_moda(vizinhos):
-    histograma   = computar_histograma(  vizinhos)
-    moda         = np.argmax          (histograma)
-    assert moda >= 0 and moda <= 255
-    return moda
-
 def quantizar(imagem, k):
     assert len(imagem.shape) == 2
     tons_por_k      = 256 // k
@@ -115,6 +109,17 @@ def quantizar(imagem, k):
         for j in range(altura):
             resto = nova_imagem[i, j] % tons_por_k
             nova_imagem[i, j] += tons_por_k - resto - 1
+    return nova_imagem
+
+def girar_imagem(imagem):
+    assert len(imagem.shape) == 2 
+    largura, altura = imagem.shape
+    nova_imagem     = imagem.copy() 
+
+    for i in range( largura ):
+        for j in range(altura):
+            nova_imagem[i, j] = imagem[j, i]
+
     return nova_imagem
 
 def equalizar(imagem):
@@ -148,6 +153,10 @@ def aplicar_funcao_em_canais(funcao, imagem, *args):
 
 
 def run(imagem):
+
+    girar = aplicar_funcao_em_canais(girar_imagem, imagem)
+    imageio.imwrite('/home/faculdade/git/digital_image_processing/exemplares/girar.png',       girar             )    
+
     binarizado = aplicar_funcao_em_canais(binarizar, imagem, 127)                                                           #1
     imageio.imwrite('/home/faculdade/git/digital_image_processing/exemplares/binarizado_cor.png',       binarizado      )
     
@@ -166,30 +175,26 @@ def run(imagem):
     borrao_gaussiano = aplicar_funcao_em_canais(convolucao, imagem, mascara_borrao_gaussiano)
     imageio.imwrite('/home/faculdade/git/digital_image_processing/exemplares/borrao_gaussiano_cor.png', borrao_gaussiano)   #6
     
-    moda = aplicar_funcao_em_canais(correlacao, imagem, filtro_moda)
-    imageio.imwrite('/home/faculdade/git/digital_image_processing/exemplares/moda_cor.png',             moda            )   #7
-    
     media = aplicar_funcao_em_canais(correlacao, imagem, filtro_media)
-    imageio.imwrite('/home/faculdade/git/digital_image_processing/exemplares/media_cor.png',            media           )   #8
+    imageio.imwrite('/home/faculdade/git/digital_image_processing/exemplares/media_cor.png',            media           )   #7
     
     mediana = aplicar_funcao_em_canais(correlacao, imagem, filtro_mediana)
-    imageio.imwrite('/home/faculdade/git/digital_image_processing/exemplares/mediana_cor.png',          mediana         )   #9
+    imageio.imwrite('/home/faculdade/git/digital_image_processing/exemplares/mediana_cor.png',          mediana         )   #8
     
     sobel = aplicar_funcao_em_canais(filtro_sobel, imagem)
-    imageio.imwrite('/home/faculdade/git/digital_image_processing/exemplares/sobel_cor.png',            sobel           )   #10
+    imageio.imwrite('/home/faculdade/git/digital_image_processing/exemplares/sobel_cor.png',            sobel           )   #9
     
     prewitt = aplicar_funcao_em_canais(filtro_prewitt, imagem)
-    imageio.imwrite('/home/faculdade/git/digital_image_processing/exemplares/prewitt_cor.png',          prewitt         )   #11
+    imageio.imwrite('/home/faculdade/git/digital_image_processing/exemplares/prewitt_cor.png',          prewitt         )   #10
        
     quantizado_32 = aplicar_funcao_em_canais(quantizar, imagem, 32)
-    imageio.imwrite('/home/faculdade/git/digital_image_processing/exemplares/quantizado_32_cor.png',    quantizado_32   )   #12
+    imageio.imwrite('/home/faculdade/git/digital_image_processing/exemplares/quantizado_32_cor.png',    quantizado_32   )   #11
     
     quantizado_8 = aplicar_funcao_em_canais(quantizar, imagem, 8)
     imageio.imwrite('/home/faculdade/git/digital_image_processing/exemplares/quantizado_8_cor.png',     quantizado_8    )   #...
     
     equalizado = aplicar_funcao_em_canais(equalizar, imagem)
-    imageio.imwrite('/home/faculdade/git/digital_image_processing/exemplares/equalizado_cor.png',       equalizado      )   #13
+    imageio.imwrite('/home/faculdade/git/digital_image_processing/exemplares/equalizado_cor.png',       equalizado      )   #12
 
 lenna = imageio.imread ('lenna.jpg')
 run                    (      lenna)
-
