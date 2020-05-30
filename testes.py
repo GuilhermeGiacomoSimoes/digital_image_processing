@@ -3,8 +3,19 @@ from FILTROS import *
 lenna = imageio.imread ('lenna.jpg')
 
 
+
+
+def dividir_imagem_em_canais_de_cor_para_teste(imagem):
+    canais = np.dsplit(imagem, imagem.shape[-1])
+    for canal in canais:
+        yield canal[..., 0]
+
+
+
+
+
 #
-# TESTA SE A IMAGEM TEM LINHA E COLUNA
+# TESTA SE A IMAGEM TEM LINHA, COLUNA E NUMERO DE BITs
 #
 def test_imagem():
     assert len(lenna.shape) == 3
@@ -35,30 +46,19 @@ def test_girar_imagem_altura_largura():
 
 
 
+
 #
 # A IMAGEM BINARIZADA SO DEVE CONTER PIXELS NO VALOR DE 255 OU 0
 #
 def test_binarizacao():
-    imagem_binarizada = aplicar_funcao_em_canais(binarizar, lenna, 127)
-    largura, altura, bits= imagem_binarizada.shape
-   
-    nao_255_ou_0 = False
+
+    nao_255_ou_0 = False 
+
+    for canal in  dividir_imagem_em_canais_de_cor_para_teste(lenna):
+        canal_binarizado = binarizar(canal, 127)
+        print(canal_binarizado)
  
-    for i in range(largura):
-        for j in range(altura):
-            if imagem_binarizada[i, j] is not  255 and imagem_binarizada[i, j] is not 0:
-                nao_255_ou_0 = True
-                break
-
-    assert not nao_255_ou_0
-            
-
-
-
-
-
-
-
+    assert (not nao_255_ou_0)
 
 
 
