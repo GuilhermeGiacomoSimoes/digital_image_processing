@@ -1,12 +1,22 @@
+import sys, random, argparse 
 import numpy             as np
 import matplotlib.pyplot as plt
 import imageio
+import math 
+from PIL import Image 
 
 mascara_identidade       = np.array             ([[0, 0,  0],  [0, 1,   0],    [0, 0,  0]])
 mascara_borda            = np.array             ([[0, 1,  0],  [1, -4,  1],    [0, 1,  0]])
 mascara_afiado           = np.array             ([[0, -1, 0],  [-1, 5, -1],    [0, -1, 0]])
 mascara_borrao           = (1/9) * np.array     ([[1, 1,  1],  [1, 1,   1],    [1, 1,  1]])
 mascara_borrao_gaussiano = (1/16) * np.array    ([[1, 2,  1],  [2, 4,   2],    [1, 2,  1]])
+
+
+gscale1 = "$@B%8&WM#*oahkbdpqwmZO0QLCJUYXzcvunxrjft/\|()1{}[]?-_+~<>i!lI;:,\"^`'. "
+  
+gscale2 = '@%#*+=-:. '
+  
+
 
 def computar_histograma(imagem):
     assert len(imagem.shape) == 2
@@ -152,6 +162,87 @@ def aplicar_funcao_em_canais(funcao, imagem, *args):
     return mesclar_canais_de_cor_em_imagem(list(aplicar()))
 
 
+
+
+
+
+
+
+
+
+
+
+
+def getAverageL(image): 
+  
+    """ 
+    Given PIL Image, return average value of grayscale value 
+    """
+    # get image as numpy array 
+    im = np.array(image) 
+  
+    # get shape 
+    w,h = im.shape 
+  
+    # get average 
+    return np.average(im.reshape(w*h)) 
+  
+def covertImageToAscii(fileName, cols, scale, moreLevels): 
+    """ 
+    Given Image and dims (rows, cols) returns an m*n list of Images  
+    """
+    global gscale1, gscale2 
+  
+    image = Image.open(fileName).convert('L') 
+  
+    W, H = image.size[0], image.size[1] 
+    print("input image dims: %d x %d" % (W, H)) 
+  
+    w = W/cols 
+  
+    h = w/scale 
+  
+    rows = int(H/h) 
+      
+    print("cols: %d, rows: %d" % (cols, rows)) 
+    print("tile dims: %d x %d" % (w, h)) 
+  
+    if cols > W or rows > H: 
+        print("Image too small for specified cols!") 
+        exit(0) 
+  
+    aimg = [] 
+    for j in range(rows): 
+        y1 = int(j*h) 
+        y2 = int((j+1)*h) 
+  
+        if j == rows-1: 
+            y2 = H 
+  
+        aimg.append("") 
+  
+        for i in range(cols): 
+  
+            x1 = int(i*w) 
+            x2 = int((i+1)*w) 
+  
+            if i == cols-1: 
+                x2 = W 
+  
+            img = image.crop((x1, y1, x2, y2)) 
+  
+            avg = int(getAverageL(img)) 
+  
+            if moreLevels: 
+                gsval = gscale1[int((avg*69)/255)] 
+            else: 
+                gsval = gscale2[int((avg*9)/255)] 
+  
+            aimg[j] += gsval 
+      
+    return aimg 
+  
+
 def run(imagem):
 
     girar = aplicar_funcao_em_canais(girar_imagem, imagem)
@@ -195,6 +286,42 @@ def run(imagem):
     
     equalizado = aplicar_funcao_em_canais(equalizar, imagem)
     imageio.imwrite('/home/faculdade/git/digital_image_processing/exemplares/equalizado_cor.png',       equalizado      )   #12
+
+
+    descStr = "Convertendo imagem pra ascii art"
+    parser = argparse.ArgumentParser(description=descStr) 
+    parser.add_argument('--file', dest='imgFile', required=True) 
+    parser.add_argument('--scale', dest='scale', required=False) 
+    parser.add_argument('--out', dest='outFile', required=False) 
+    parser.add_argument('--cols', dest='cols', required=False) 
+    parser.add_argument('--morelevels',dest='moreLevels',action='store_true') 
+  
+    args = parser.parse_args() 
+    
+    imgFile = args.imgFile 
+    
+    outFile = './exemplares/ascii.txt'
+    if args.outFile: 
+        outFile = args.outFile 
+  
+    scale = 0.43
+    if args.scale: 
+        scale = float(args.scale) 
+  
+    cols = 80
+    if args.cols: 
+        cols = int(args.cols) 
+  
+    print('gerando ASCII art...') 
+    aimg = covertImageToAscii(imgFile, cols, scale, args.moreLevels) 
+  
+    f = open(outFile, 'w') 
+  
+    for row in aimg: 
+        f.write(row + '\n') 
+  
+    f.close() 
+
 
 lenna = imageio.imread ('lenna.jpg')
 run                    (      lenna)
